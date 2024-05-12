@@ -1,4 +1,4 @@
-package ru.ac.uniyar.simplex;
+package ru.ac.uniyar.simplex.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;

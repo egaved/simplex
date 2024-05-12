@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright (c) 2015, 2019, Gluon and/or its affiliates.
+  All rights reserved. Use is subject to license terms.
+
+  This file is available and licensed under the following license:
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions
+  are met:
+
+  - Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the distribution.
+  - Neither the name of Oracle Corporation nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox prefHeight="641.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.ac.uniyar.simplex.controllers.MainPageController">
+    <children>
+        <MenuBar prefHeight="25.0" prefWidth="1129.0" AnchorPane.topAnchor="0.0" VBox.vgrow="NEVER">
+            <menus>
+                <Menu mnemonicParsing="false" text="Файл">
+                    <items>
+                        <MenuItem fx:id="setCondition" mnemonicParsing="false" text="Задать условие" />
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="О программе">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="Справка" />
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+        <HBox layoutY="24.0" prefHeight="35.0" prefWidth="840.0" spacing="10">
+            <children>
+                <HBox prefHeight="25.0" prefWidth="236.0" spacing="5">
+                    <Label layoutX="14.0" layoutY="18.0" prefHeight="17.0" prefWidth="176.0" text="Количество переменных (2-16)" />
+                    <TextField fx:id="variablesNum" prefHeight="25.0" prefWidth="58.0" />
+                </HBox>
+
+                <HBox spacing="5">
+                    <Label layoutX="14.0" layoutY="56.0" text="Количество ограничений (1-15)" />
+                    <TextField fx:id="restrictionsNum" prefHeight="25.0" prefWidth="58.0" />
+                </HBox>
+
+                <HBox spacing="5">
+                    <Label layoutX="13.0" layoutY="88.0" text="Задача" />
+                    <ChoiceBox fx:id="taskCB" layoutX="62.0" layoutY="121.0" prefHeight="25.0" prefWidth="116.0">
+                        <String fx:id="min" fx:value="Минимизировать" />
+                        <String fx:id="max" fx:value="Максимизировать" />
+                    </ChoiceBox>
+                </HBox>
+
+                <HBox spacing="5">
+                    <Label layoutX="13.0" layoutY="125.0" text="Дроби" />
+                    <ChoiceBox fx:id="fractionsCB" layoutX="62.0" layoutY="121.0" prefHeight="25.0" prefWidth="116.0">
+                        <String fx:id="ord" fx:value="Обыкновенные" />
+                        <String fx:id="" fx:value="Десятичные" />
+                    </ChoiceBox>
+                </HBox>
+                <Button fx:id="submitBtn" layoutX="871.0" layoutY="29.0" mnemonicParsing="false" onAction="#onSubmitButtonClicked" prefHeight="17.0" prefWidth="106.0" text="Применить" />
+            </children>
+            <padding>
+                <Insets left="10.0" top="5.0" />
+            </padding>
+        </HBox>
+
+
+
+      <GridPane fx:id="table" hgap="10.0" layoutX="15.0" layoutY="59.0" prefHeight="451.0" prefWidth="994.0" vgap="10.0">
+         <columnConstraints>
+            <ColumnConstraints />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+         </rowConstraints></GridPane>
+
+    </children>
+</VBox>
