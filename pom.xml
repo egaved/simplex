@@ -54,7 +54,13 @@
       <artifactId>junit-jupiter-engine</artifactId>
       <version>${junit.version}</version>
       <scope>test</scope>
-    </dependency>  </dependencies>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.0</version>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>
@@ -76,7 +82,7 @@
             <!-- Default configuration for running with: mvn clean javafx:run -->
             <id>default-cli</id>
             <configuration>
-              <mainClass>ru.ac.uniyar.simplex/ru.ac.uniyar.simplex.HelloApplication</mainClass>
+              <mainClass>ru.ac.uniyar.simplex/ru.ac.uniyar.simplex.Application</mainClass>
               <launcher>app</launcher>
               <jlinkZipName>app</jlinkZipName>
               <jlinkImageName>app</jlinkImageName>

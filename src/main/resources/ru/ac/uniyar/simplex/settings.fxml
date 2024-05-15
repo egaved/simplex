@@ -37,7 +37,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox prefHeight="641.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.ac.uniyar.simplex.controllers.MainPageController">
+<VBox alignment="TOP_CENTER" prefHeight="774.0" prefWidth="1169.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.ac.uniyar.simplex.controllers.MainPageController">
     <children>
         <MenuBar prefHeight="25.0" prefWidth="1129.0" AnchorPane.topAnchor="0.0" VBox.vgrow="NEVER">
             <menus>
@@ -86,17 +86,26 @@
                 <Insets left="10.0" top="5.0" />
             </padding>
         </HBox>
-
-
-
-      <GridPane fx:id="table" hgap="10.0" layoutX="15.0" layoutY="59.0" prefHeight="451.0" prefWidth="994.0" vgap="10.0">
-         <columnConstraints>
-            <ColumnConstraints />
-         </columnConstraints>
-         <rowConstraints>
-            <RowConstraints />
-            <RowConstraints />
-         </rowConstraints></GridPane>
+      <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0">
+         <children>
+      
+      
+      
+            <GridPane fx:id="table" alignment="CENTER" hgap="10.0" prefHeight="451.0" prefWidth="1080.0" vgap="10.0">
+               <columnConstraints>
+                  <ColumnConstraints />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints />
+                  <RowConstraints />
+               </rowConstraints>
+               <VBox.margin>
+                  <Insets bottom="10.0" />
+               </VBox.margin>
+            </GridPane>
+            <Button fx:id="saveButton" alignment="CENTER" mnemonicParsing="false" onAction="#onSaveButtonClicked" prefHeight="25.0" prefWidth="60.0" text="Сохранить" visible="false" />
+         </children>
+      </VBox>
 
     </children>
 </VBox>

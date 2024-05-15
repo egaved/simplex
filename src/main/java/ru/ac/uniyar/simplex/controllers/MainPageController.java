@@ -1,12 +1,14 @@
 package ru.ac.uniyar.simplex.controllers;
 
 import javafx.fxml.FXML;
+import javafx.geometry.HPos;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import org.apache.commons.lang3.math.Fraction;
+import ru.ac.uniyar.simplex.domain.Condition;
+import ru.ac.uniyar.simplex.stages.SimplexStepsStage;
+
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -26,7 +28,10 @@ public class MainPageController {
     private ChoiceBox<String> fractionsCB;
     @FXML
     private GridPane table;
+    @FXML
+    private Button saveButton;
 
+    private Condition condition;
 
     public void onSubmitButtonClicked() {
         try {
@@ -35,8 +40,6 @@ public class MainPageController {
             if (columns < 2 || rows < 1 || rows >= columns)
                 throw new NumberFormatException();
             table.getChildren().clear();
-//            table.setPrefWidth(columns * 50);
-//            table.setPrefHeight(rows * 50);
 
             // Создание заголовков столбцов
             for (int i = 0; i <= columns + 1; i++) {
@@ -46,9 +49,8 @@ public class MainPageController {
                 else columnHeader = "   a" + (i);
                 Label columnLabel = new Label(columnHeader);
                 table.add(columnLabel, i, 0);
+                GridPane.setHalignment(columnLabel, HPos.CENTER);
             }
-
-
 
             for (int i = 1; i <= rows + 1; i++) {
                 table.addRow(i);
@@ -57,16 +59,15 @@ public class MainPageController {
                         String rowHeader = "f" + (i - 1) + "(x)";
                         Label rowLabel = new Label(rowHeader);
                         table.add(rowLabel, 0, i); // Добавляем заголовок строки
-                    }
-                    else {
+                    } else {
                         TextField tf = new TextField("0");
-                        table.add(tf,j,i);
+                        table.add(tf, j, i);
                     }
                 }
-            }
 
-            List<Integer> values = getTableValues();
-            System.out.println(values);
+            }
+            saveButton.setVisible(true);
+
         } catch (NumberFormatException ex) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Ошибка");
@@ -76,15 +77,50 @@ public class MainPageController {
         }
     }
 
-    public List<Integer> getTableValues() {
-        List<Integer> values = new ArrayList<>();
+    public Fraction[] getTargetFuncCoefficients() {
+        Fraction[] values = new Fraction[Integer.parseInt(variablesNum.getText())];
+        int i = 0;
         for (Node node : table.getChildren()) {
-            if (node instanceof TextField) {
-                values.add(Integer.valueOf(((TextField) node).getText()));
+            if (GridPane.getRowIndex(node) == 0 && node instanceof TextField) {
+                Fraction fraction = Fraction.getFraction(((TextField) node).getText());
+                if (fraction != null) {
+                    values[i++] = fraction;
+                }
             }
         }
         return values;
     }
+
+    public Fraction[][] getRestrictionsCoefficients() {
+        int n = Integer.parseInt(restrictionsNum.getText());
+        int m = Integer.parseInt(variablesNum.getText());
+        Fraction[][] values = new Fraction[n][m];
+        int i = 0;
+        int j = 0;
+        for (Node node : table.getChildren()) {
+            if (GridPane.getRowIndex(node) == 0 && node instanceof TextField) {
+                Fraction fraction = Fraction.getFraction(((TextField) node).getText());
+                if (fraction != null) {
+                    values[i++][j++] = fraction;
+                }
+            }
+        }
+        return values;
+    }
+
+    public void onSaveButtonClicked() {
+        this.condition = new Condition();
+        condition.setVariablesNum(Integer.parseInt(variablesNum.getText()));
+        condition.setRestrictionsNum(Integer.parseInt(restrictionsNum.getText()));
+        condition.setMinimize(taskCB.getValue().equals("Минимизировать"));
+        condition.setDecimals(fractionsCB.getValue().equals("Десятичные"));
+        condition.setTargetFuncCoefficients(getTargetFuncCoefficients());
+        condition.setRestrictionsCoefficients(getRestrictionsCoefficients());
+
+        SimplexStepsStage simplexStage = new SimplexStepsStage();
+        simplexStage.display(condition);
+    }
+
 
     public String readFile() {
         StringBuilder sb = new StringBuilder();

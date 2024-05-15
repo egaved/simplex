@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" prefHeight="740.0" prefWidth="880.0" spacing="20.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.2-ea"
+      fx:controller="ru.ac.uniyar.simplex.controllers.SimplexStepsController">
+  <padding>
+    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+  </padding>
+   <GridPane>
+
+   </GridPane>
+   <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="300.0">
+      <children>
+         <Button fx:id="prevButton" onAction="#onPrevButtonClick" text="&lt;--" />
+        <Button fx:id="nextButton" onAction="#onNextButtonClick" text="--&gt;" />
+      </children>
+   </HBox>
+</VBox>
