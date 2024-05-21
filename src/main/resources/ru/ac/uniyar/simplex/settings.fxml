@@ -88,10 +88,20 @@
         </HBox>
       <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0">
          <children>
-      
-      
-      
-            <GridPane fx:id="table" alignment="CENTER" hgap="10.0" prefHeight="451.0" prefWidth="1080.0" vgap="10.0">
+             <GridPane fx:id="targetTable" alignment="CENTER" hgap="10.0" prefHeight="451.0" prefWidth="1080.0" vgap="10.0">
+                 <columnConstraints>
+                     <ColumnConstraints />
+                 </columnConstraints>
+                 <rowConstraints>
+                     <RowConstraints />
+                     <RowConstraints />
+                 </rowConstraints>
+                 <VBox.margin>
+                     <Insets bottom="10.0" />
+                 </VBox.margin>
+             </GridPane>
+
+            <GridPane fx:id="restrictTable" alignment="CENTER" hgap="10.0" prefHeight="451.0" prefWidth="1080.0" vgap="10.0">
                <columnConstraints>
                   <ColumnConstraints />
                </columnConstraints>

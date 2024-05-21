@@ -2,6 +2,8 @@ package ru.ac.uniyar.simplex.domain;
 
 import org.apache.commons.lang3.math.Fraction;
 
+import java.util.List;
+
 public class Condition {
     private Integer variablesNum;
 
@@ -11,29 +13,15 @@ public class Condition {
 
     private Boolean decimals;
 
+    private Boolean artificialBasis;
+
     private Fraction[] targetFuncCoefficients;
 
     private Fraction[][] restrictionsCoefficients;
 
-//    public Condition () {
-//        this.variablesNum = null;
-//        this.restrictionsNum = null;
-//        this.minimize = null;
-//        this.decimals = null;
-//        this.targetFuncCoefficients = null;
-//        this.restrictionsCoefficients = null;
-//    }
-//
-//    public Condition(Integer variablesNum, Integer restrictionsNum, String task, String fractions, Fraction[] targetFuncCoefficients, Fraction[][] restrictionsCoefficients) {
-//        this.variablesNum = variablesNum;
-//        this.restrictionsNum = restrictionsNum;
-//
-//        this.minimize = task.equals("Минимизировать");
-//        this.decimals = fractions.equals("Десятичные");
-//
-//        this.targetFuncCoefficients = targetFuncCoefficients;
-//        this.restrictionsCoefficients = restrictionsCoefficients;
-//    }
+    private List<Integer> basis;
+
+
 
     public Integer getVariablesNum() {
         return variablesNum;
@@ -81,5 +69,22 @@ public class Condition {
 
     public void setRestrictionsCoefficients(Fraction[][] restrictionsCoefficients) {
         this.restrictionsCoefficients = restrictionsCoefficients;
+    }
+
+
+    public List<Integer> getBasis() {
+        return basis;
+    }
+
+    public void setBasis(List<Integer> basis) {
+        this.basis = basis;
+    }
+
+    public Boolean getArtificialBasis() {
+        return artificialBasis;
+    }
+
+    public void setArtificialBasis(Boolean artificialBasis) {
+        this.artificialBasis = artificialBasis;
     }
 }

@@ -1,4 +1,4 @@
-package ru.ac.uniyar.simplex.stages;
+package ru.ac.uniyar.simplex.windows;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -9,7 +9,7 @@ import ru.ac.uniyar.simplex.domain.Condition;
 
 import java.io.IOException;
 
-public class SimplexStepsStage {
+public class SimplexStepsWindow {
 
     public void display(Condition condition) {
         try {
