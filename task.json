@@ -1,0 +1,11 @@
+{
+  "variablesNum" : 3,
+  "restrictionsNum" : 2,
+  "minimize" : true,
+  "decimals" : false,
+  "artificialBasis" : false,
+  "targetFuncCoefficients" : [ "-1", "2", "-1" ],
+  "restrictionsCoefficients" : [ [ "1", "4", "1", "5" ], [ "1", "-2", "-1", "-1" ] ],
+  "basis" : [ 1, 2 ],
+  "freeVars" : [ 3 ]
+}
