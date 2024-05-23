@@ -2,6 +2,7 @@ package ru.ac.uniyar.simplex.domain;
 
 import org.apache.commons.lang3.math.Fraction;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Condition {
@@ -15,13 +16,13 @@ public class Condition {
 
     private Boolean artificialBasis;
 
-    private Fraction[] targetFuncCoefficients;
+    private String[] targetFuncCoefficients;
 
-    private Fraction[][] restrictionsCoefficients;
+    private String[][] restrictionsCoefficients;
 
-    private List<Integer> basis;
+    private ArrayList<Integer> basis;
 
-
+    private ArrayList<Integer> freeVars;
 
     public Integer getVariablesNum() {
         return variablesNum;
@@ -55,28 +56,28 @@ public class Condition {
         this.decimals = decimals;
     }
 
-    public Fraction[] getTargetFuncCoefficients() {
+    public String[] getTargetFuncCoefficients() {
         return targetFuncCoefficients;
     }
 
-    public void setTargetFuncCoefficients(Fraction[] targetFuncCoefficients) {
+    public void setTargetFuncCoefficients(String[] targetFuncCoefficients) {
         this.targetFuncCoefficients = targetFuncCoefficients;
     }
 
-    public Fraction[][] getRestrictionsCoefficients() {
+    public String[][] getRestrictionsCoefficients() {
         return restrictionsCoefficients;
     }
 
-    public void setRestrictionsCoefficients(Fraction[][] restrictionsCoefficients) {
+    public void setRestrictionsCoefficients(String[][] restrictionsCoefficients) {
         this.restrictionsCoefficients = restrictionsCoefficients;
     }
 
 
-    public List<Integer> getBasis() {
+    public ArrayList<Integer> getBasis() {
         return basis;
     }
 
-    public void setBasis(List<Integer> basis) {
+    public void setBasis(ArrayList<Integer> basis) {
         this.basis = basis;
     }
 
@@ -86,5 +87,13 @@ public class Condition {
 
     public void setArtificialBasis(Boolean artificialBasis) {
         this.artificialBasis = artificialBasis;
+    }
+
+    public ArrayList<Integer> getFreeVars() {
+        return freeVars;
+    }
+
+    public void setFreeVars(ArrayList<Integer> freeVars) {
+        this.freeVars = freeVars;
     }
 }

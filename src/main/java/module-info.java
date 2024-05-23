@@ -7,6 +7,7 @@ module ru.ac.uniyar.simplex {
     requires org.kordamp.bootstrapfx.core;
     requires commons.lang3;
     requires java.desktop;
+    requires com.fasterxml.jackson.databind;
 
     opens ru.ac.uniyar.simplex to javafx.fxml;
     exports ru.ac.uniyar.simplex.windows;

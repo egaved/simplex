@@ -7,7 +7,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import org.apache.commons.lang3.math.Fraction;
 import ru.ac.uniyar.simplex.domain.Condition;
-import ru.ac.uniyar.simplex.exceptions.OnlyZerosException;
 import ru.ac.uniyar.simplex.windows.SimplexStepsWindow;
 
 
@@ -17,6 +16,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static ru.ac.uniyar.simplex.secondary.JSONReader.readTaskFromJSON;
+import static ru.ac.uniyar.simplex.secondary.JSONReader.saveTaskToJSONFile;
 
 public class MainPageController {
 
@@ -116,8 +118,8 @@ public class MainPageController {
         }
     }
 
-    public Fraction[] getTargetFuncCoefficients() throws Exception {
-        Fraction[] values = new Fraction[Integer.parseInt(variablesNum.getText())];
+    public String[] getTargetFuncCoefficients() throws Exception {
+        String[] values = new String[Integer.parseInt(variablesNum.getText())];
         int i = 0;
         for (Node node : targetTable.getChildren()) {
             if (node instanceof TextField textField) {
@@ -126,7 +128,9 @@ public class MainPageController {
                     throw new Exception("Поля коэффициентов целевой функции не могут содержать нули или быть пустыми.");
                 Fraction fraction = Fraction.getFraction(value);
                 if (fraction != null) {
-                    values[i] = fraction.reduce();
+                    if (fraction.getDenominator() == 1)
+                        values[i] = String.valueOf(fraction.getNumerator());
+                    else values[i] = String.valueOf(fraction.reduce());
                 }
                 i++;
             }
@@ -134,10 +138,10 @@ public class MainPageController {
         return values;
     }
 
-    public Fraction[][] getRestrictionsCoefficients() throws Exception {
+    public String[][] getRestrictionsCoefficients() throws Exception {
         int n = Integer.parseInt(restrictionsNum.getText()); //restrictions
         int m = Integer.parseInt(variablesNum.getText());   //vars
-        Fraction[][] values = new Fraction[n][];
+        String[][] values = new String[n][];
         ArrayList<String> row = new ArrayList<>();
         int i = 0; //row
         boolean nz = false;
@@ -150,10 +154,12 @@ public class MainPageController {
                     if (!nz)
                         throw new Exception("Обнаружено ограничение, в котором все коэффициенты равны нулю.");
 
-                    values[i] = new Fraction[row.size()];
+                    values[i] = new String[row.size()];
 
                     for (int j = 0; j < row.size(); j++) {
-                        values[i][j] = Fraction.getFraction(row.get(j));
+                        Fraction fraction = Fraction.getFraction(row.get(j)).reduce();
+                        if (fraction.getDenominator() == 1) values[i][j] = String.valueOf(fraction.getNumerator());
+                        else values[i][j] = String.valueOf(fraction);
                     }
                     row.clear();
                     nz = false;
@@ -164,8 +170,8 @@ public class MainPageController {
         return values;
     }
 
-    private List<Integer> getBasisVars() throws Exception {
-        List<Integer> basis = new ArrayList<>();
+    private ArrayList<Integer> getBasisVars() throws Exception {
+        ArrayList<Integer> basis = new ArrayList<>();
         for (Node node : targetTable.getChildren()) {
             if (node instanceof CheckBox checkBox && checkBox.isSelected())
                 basis.add(GridPane.getColumnIndex(checkBox));
@@ -173,6 +179,15 @@ public class MainPageController {
         if (!basis.isEmpty() && basis.size() < Integer.parseInt(restrictionsNum.getText()))
             throw new Exception("Количество базисов должно соответствовать количеству ограничений.");
         return basis;
+    }
+
+    public ArrayList<Integer> getFreeVars(Condition condition) {
+        ArrayList<Integer> vars = new ArrayList<>();
+        for (int i = 1; i <= condition.getVariablesNum(); i++) {
+            if (!(condition.getBasis().contains(i)))
+                vars.add(i);
+        }
+        return vars;
     }
 
     public void onSaveButtonClicked() {
@@ -184,38 +199,41 @@ public class MainPageController {
             condition.setDecimals(fractionsCB.getValue().equals("Десятичные"));
             condition.setTargetFuncCoefficients(getTargetFuncCoefficients());
             condition.setRestrictionsCoefficients(getRestrictionsCoefficients());
-            List<Integer> basis = getBasisVars();
+            ArrayList<Integer> basis = getBasisVars();
             if (basis.isEmpty()) {
                 condition.setBasis(basis);
                 condition.setArtificialBasis(true);
             } else {
                 condition.setBasis(basis);
+                condition.setFreeVars(getFreeVars(condition));
                 condition.setArtificialBasis(false);
             }
-            systemOutput(condition);
+
             SimplexStepsWindow simplexStage = new SimplexStepsWindow();
             simplexStage.display(condition);
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Ошибка");
             alert.setHeaderText("Произошла ошибка при обработке данных");
-            alert.setContentText(e.getMessage());
+            if (e.getClass().equals(NullPointerException.class))
+                alert.setContentText("Не заданы условия задачи.");
+            else if (e.getClass().equals(NumberFormatException.class))
+                alert.setContentText("В одно из полей введено не число.");
+            else
+                alert.setContentText(e.getMessage());
             alert.showAndWait();
         }
-
     }
 
-    public void systemOutput(Condition condition) {
-        System.out.println("varNum: "  + condition.getVariablesNum());
-        System.out.println("restNum: " + condition.getRestrictionsNum() );
-        System.out.println("min?: " + condition.getMinimize() );
-        System.out.println("dec?: " + condition.getDecimals() );
-        System.out.println("target: " + Arrays.toString(condition.getTargetFuncCoefficients()));
-        System.out.println("restrict: " + Arrays.deepToString(condition.getRestrictionsCoefficients()));
-        System.out.println("basis: " + condition.getBasis());
-        System.out.println("artBas?: " + condition.getArtificialBasis());
+    public void onSaveToFileButtonClicked() throws IOException {
+        saveTaskToJSONFile(condition);
     }
 
+    public void onReadFileButtonClicked() throws IOException {
+        Condition condition = readTaskFromJSON();
+        SimplexStepsWindow simplexStage = new SimplexStepsWindow();
+        simplexStage.display(condition);
+    }
 
     public String readFile() {
         StringBuilder sb = new StringBuilder();
@@ -229,4 +247,16 @@ public class MainPageController {
         }
         return sb.toString();
     }
+
+    public void systemOutput(Condition condition) {
+        System.out.println("varNum: "  + condition.getVariablesNum());
+        System.out.println("restNum: " + condition.getRestrictionsNum() );
+        System.out.println("min?: " + condition.getMinimize() );
+        System.out.println("dec?: " + condition.getDecimals() );
+        System.out.println("target: " + Arrays.toString(condition.getTargetFuncCoefficients()));
+        System.out.println("restrict: " + Arrays.deepToString(condition.getRestrictionsCoefficients()));
+        System.out.println("basis: " + condition.getBasis());
+        System.out.println("artBas?: " + condition.getArtificialBasis());
+    }
+
 }

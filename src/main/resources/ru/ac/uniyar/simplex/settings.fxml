@@ -43,7 +43,8 @@
             <menus>
                 <Menu mnemonicParsing="false" text="Файл">
                     <items>
-                        <MenuItem fx:id="setCondition" mnemonicParsing="false" text="Задать условие" />
+                        <MenuItem fx:id="readFileButton" mnemonicParsing="false" onAction="#onReadFileButtonClicked" text="Загрузить из файла" />
+                  <MenuItem fx:id="saveToFileButton" mnemonicParsing="false" onAction="#onSaveToFileButtonClicked" text="Сохранить в файл" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="О программе">

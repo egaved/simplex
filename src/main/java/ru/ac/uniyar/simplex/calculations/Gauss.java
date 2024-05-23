@@ -1,5 +1,6 @@
 package ru.ac.uniyar.simplex.calculations;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import org.apache.commons.lang3.math.Fraction;
@@ -14,10 +15,10 @@ public class Gauss {
         int n = mtr.length;
         int m = mtr[0].length;
         if (n < m - 1) {
-            int[] basis = new int[n];
+            ArrayList<Integer> basis = new ArrayList<>();
             System.out.println("Choose " + n + " basic columns. Enter two number from 0 to " + (m - 2) + ":");
             for (int i = 0; i < n; i++) {
-                basis[i] = sc.nextInt();
+                basis.set(i, sc.nextInt());
             }
             solveSystemWithBasis(mtr, basis);
         } else solveSystem(mtr);
@@ -49,33 +50,34 @@ public class Gauss {
         }
     }
 
-    public static void solveSystemWithBasis(Fraction[][] matrix, int[] basis) {
+    public static Fraction[][] solveSystemWithBasis(Fraction[][] matrix, ArrayList<Integer> basis) {
         System.out.println("MATRIX TRANSFORMATION");
         int n = matrix.length; //rows
         int m = matrix[0].length; //columns
 
+        Fraction[][] finalMatrix = new Fraction[n][m];
         for (int i = 0; i < n; i++) {
-            Fraction divisor = matrix[i][basis[i]];
-            for (int j = 0; j < m; j++) {
-                matrix[i][j] = matrix[i][j].divideBy(divisor);
-            }
-            printMatrix(matrix);
-            for (int k = 0; k < n; k++) {
-                if (k != i) {
-                    Fraction multiplier = matrix[k][basis[i]];
-                    for (int l = 0; l < m; l++) {
-                        matrix[k][l] = matrix[k][l].subtract(matrix[i][l].multiplyBy(multiplier));
-                    }
-                }
-                printMatrix(matrix);
-            }
+            System.arraycopy(matrix[i], 0, finalMatrix[i], 0, m);
         }
 
-        answerOutput(n, matrix);
-
+        for (int i = 0; i < n; i++) {
+            Fraction divisor = finalMatrix[i][basis.get(i) - 1];
+            for (int j = 0; j < m; j++) {
+                finalMatrix[i][j] = finalMatrix[i][j].divideBy(divisor);
+            }
+            for (int k = 0; k < n; k++) {
+                if (k != i) {
+                    Fraction multiplier = finalMatrix[k][basis.get(i) - 1];
+                    for (int l = 0; l < m; l++) {
+                        finalMatrix[k][l] = finalMatrix[k][l].subtract(finalMatrix[i][l].multiplyBy(multiplier));
+                    }
+                }
+            }
+        }
+        return finalMatrix;
     }
 
-    public static void answerOutput(int n, Fraction[][] matrix){
+    public static void answerOutput(Fraction[][] matrix){
         System.out.println("FINAL MATRIX");
         System.out.println("-".repeat(matrix[0].length * 5));
         for(int i = 1; i < matrix[0].length; i++) {
