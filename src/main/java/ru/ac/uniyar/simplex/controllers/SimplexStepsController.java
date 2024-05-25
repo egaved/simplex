@@ -21,9 +21,13 @@ public class SimplexStepsController {
         this.condition = condition;
     }
 
-    public void onNextButtonClick() {
+    public void init() {
         SimplexTable st = new SimplexTable(condition);
-        System.out.println(Arrays.deepToString(st.getElements()));
+
+    }
+
+    public void onNextButtonClick() {
+
     }
 
     public void onPrevButtonClick() {

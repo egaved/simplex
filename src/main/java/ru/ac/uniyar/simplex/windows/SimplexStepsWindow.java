@@ -20,6 +20,7 @@ public class SimplexStepsWindow {
             stage.setScene(scene);
             SimplexStepsController controller = fxmlLoader.getController();
             controller.setProperties(stage, condition);
+            controller.init();
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();

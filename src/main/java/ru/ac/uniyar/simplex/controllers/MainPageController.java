@@ -128,9 +128,10 @@ public class MainPageController {
                     throw new Exception("Поля коэффициентов целевой функции не могут содержать нули или быть пустыми.");
                 Fraction fraction = Fraction.getFraction(value);
                 if (fraction != null) {
-                    if (fraction.getDenominator() == 1)
-                        values[i] = String.valueOf(fraction.getNumerator());
-                    else values[i] = String.valueOf(fraction.reduce());
+//                    if (fraction.getDenominator() == 1)
+//                        values[i] = String.valueOf(fraction.getNumerator());
+//                    else
+                        values[i] = String.valueOf(fraction.reduce());
                 }
                 i++;
             }
@@ -220,7 +221,7 @@ public class MainPageController {
             else if (e.getClass().equals(NumberFormatException.class))
                 alert.setContentText("В одно из полей введено не число.");
             else
-                alert.setContentText(e.getMessage());
+                alert.setContentText(e.toString());
             alert.showAndWait();
         }
     }

@@ -51,7 +51,6 @@ public class Gauss {
     }
 
     public static Fraction[][] solveSystemWithBasis(Fraction[][] matrix, ArrayList<Integer> basis) {
-        System.out.println("MATRIX TRANSFORMATION");
         int n = matrix.length; //rows
         int m = matrix[0].length; //columns
 

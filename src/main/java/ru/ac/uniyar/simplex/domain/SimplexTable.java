@@ -6,6 +6,7 @@ import org.apache.commons.lang3.math.Fraction;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static java.lang.Math.abs;
 import static ru.ac.uniyar.simplex.calculations.Gauss.solveSystemWithBasis;
 
 public class SimplexTable {
@@ -31,21 +32,33 @@ public class SimplexTable {
                 matrixBeforeGauss[i][j] = Fraction.getFraction(condition.getRestrictionsCoefficients()[i][j]);
             }
         }
-        System.out.println(Arrays.deepToString(matrixBeforeGauss));
-        this.elements = solveSystemWithBasis(matrixBeforeGauss, condition.getBasis());
+        Fraction[][] gaussMatrix = solveSystemWithBasis(matrixBeforeGauss, condition.getBasis());
+        Fraction[][] finalM = formElementsTable(condition, gaussMatrix);
+        System.out.println(Arrays.deepToString(finalM));
+        this.elements = finalM;
     }
 
-    public void formElementsTable(Condition condition, Fraction[][] gaussMatrix) {
+    public Fraction[][] formElementsTable(Condition condition, Fraction[][] gaussMatrix) {
         int n = condition.getBasis().size();
         int m = condition.getFreeVars().size();
         Fraction[] target = new Fraction[n + m];
-        for (String string : condition.getTargetFuncCoefficients())
-            for (int i = 0; i < target.length; i++)
-                target[i] = Fraction.getFraction(string);
+
+        for (int i = 0; i < target.length; i++) {
+            target[i] = Fraction.getFraction(condition.getTargetFuncCoefficients()[i]);
+        }
 
         Fraction[][] freeVarsTable = getFreeVarsMatrix(gaussMatrix, condition.getBasis(), condition.getFreeVars());
-        Fraction[] lastRow = countLastRow(target, condition.getBasis(), condition.getFreeVars(), )
-        Fraction[][] finalSimplexTable = new Fraction[n + 1][m + 1];
+        Fraction[] lastRow = countLastRow(target, condition.getBasis(), condition.getFreeVars(), freeVarsTable);
+        Fraction[][] finalSimplexTable = new Fraction[freeVarsTable.length + 1][freeVarsTable[0].length];
+
+        // Копируем данные из исходной матрицы
+        for (int i = 0; i < freeVarsTable.length; i++) {
+            System.arraycopy(freeVarsTable[i], 0, finalSimplexTable[i], 0, freeVarsTable[i].length);
+        }
+        // Копируем данные из массива
+        System.arraycopy(lastRow, 0, finalSimplexTable[freeVarsTable.length], 0, lastRow.length);
+
+        return finalSimplexTable;
     }
 
     public Fraction[][] getFreeVarsMatrix(Fraction[][] gaussMatrix, ArrayList<Integer> basis, ArrayList<Integer> free) {
@@ -54,9 +67,11 @@ public class SimplexTable {
         Fraction[][] fvm = new Fraction[n][m];
 
         for (int i = 0; i < gaussMatrix.length; i++) {
+            int k = 0;
             for (int j = 0; j < gaussMatrix[0].length; j++) {
                 if (basis.contains(j + 1)) continue;
-                fvm[i][j - (m + 1)] = gaussMatrix[i][j];
+                fvm[i][k] = gaussMatrix[i][j];
+                k++;
             }
         }
 
@@ -70,9 +85,34 @@ public class SimplexTable {
         }
         Fraction negativeMultiplier = Fraction.getFraction(-1, 1);
         for (int j = 0; j < row.length; j++) {
-            for (int i = 0; i < target.length; i++) {
-                if (basis.contains(i)) continue;
-                row[j].add(matrix[].multiplyBy(negativeMultiplier).multiplyBy(target[i]));
+            int k = 0;
+            if (j != row.length - 1) {
+                for (int i = 0; i < target.length; i++) {
+                    int x_ = i + 1; // номер переменной
+                    if (!basis.contains(x_) ) { // если переменная не базисная
+                        if (free.get(j) != x_) continue; // если рассматривается ЕЁ коэфф из целевой функции
+                        Fraction oldValue = row[j];
+                        Fraction valueToAdd = target[i];
+                        Fraction sum = oldValue.add(valueToAdd);
+                        row[j] = sum;
+                    } else {
+                        Fraction oldValue = row[j];
+                        Fraction valueToAdd = matrix[k][j].multiplyBy(negativeMultiplier).multiplyBy(target[i]);
+                        Fraction sum = oldValue.add(valueToAdd);
+                        row[j] = sum;
+                        k++;
+                    }
+                }
+            } else {
+                for (int i = 0; i < target.length; i++) {
+                    int x_ = i + 1; // номер переменной
+                    if (!basis.contains(x_)) continue;
+                    Fraction oldValue = row[j];
+                    Fraction valueToAdd = matrix[k][j].multiplyBy(negativeMultiplier).multiplyBy(target[i]);
+                    Fraction sum = oldValue.add(valueToAdd);
+                    row[j] = sum;
+                    k++;
+                }
             }
         }
         return row;
