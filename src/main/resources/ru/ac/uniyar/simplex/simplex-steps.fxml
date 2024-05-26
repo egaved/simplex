@@ -8,9 +8,15 @@
   <padding>
     <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
   </padding>
-   <GridPane fx:id="table">
-
-   </GridPane>
+   <Label fx:id="pivotLabel" alignment="CENTER">
+      <VBox.margin>
+         <Insets bottom="15.0" />
+      </VBox.margin>
+   </Label>
+   <GridPane fx:id="table" alignment="CENTER" hgap="10.0" vgap="10.0">
+      <VBox.margin>
+         <Insets bottom="10.0" />
+      </VBox.margin></GridPane>
    <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="300.0">
       <children>
          <Button fx:id="prevButton" onAction="#onPrevButtonClick" text="&lt;--" />

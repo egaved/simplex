@@ -8,6 +8,7 @@ module ru.ac.uniyar.simplex {
     requires commons.lang3;
     requires java.desktop;
     requires com.fasterxml.jackson.databind;
+    requires jdk.xml.dom;
 
     opens ru.ac.uniyar.simplex to javafx.fxml;
     exports ru.ac.uniyar.simplex.windows;

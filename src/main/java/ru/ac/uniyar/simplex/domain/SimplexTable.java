@@ -1,12 +1,11 @@
 package ru.ac.uniyar.simplex.domain;
 
 import org.apache.commons.lang3.math.Fraction;
+import ru.ac.uniyar.simplex.secondary.Coordinate;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
-import static java.lang.Math.abs;
 import static ru.ac.uniyar.simplex.calculations.Gauss.solveSystemWithBasis;
 
 public class SimplexTable {
@@ -15,12 +14,58 @@ public class SimplexTable {
     private ArrayList<Integer> freeVariables;
     private Fraction[][] elements;
     private Condition condition;
+    private ArrayList<Coordinate> pivots;
+
 
     public SimplexTable(Condition condition) {
         this.basicVariables = new ArrayList<>(condition.getBasis());
         this.freeVariables = new ArrayList<>(condition.getFreeVars());
-        calculateMatrix(condition); // just given matrix after gauss.
 
+        calculateMatrix(condition); // just given matrix after gauss.
+        findPivots(this);
+    }
+
+
+    public void findPivots(SimplexTable simplexTable) {
+        ArrayList<Integer> suitableColumns = findPivotColumns(simplexTable);
+        ArrayList<Coordinate> coordinates = new ArrayList<>();
+
+        for (int j : suitableColumns) {
+            Fraction min = null;
+            // поиск минимумального b/a
+            for (int i = 0; i < simplexTable.getElements().length - 1; i++) {
+                Fraction a = simplexTable.getElements()[i][j];
+                if (a.getNumerator() <= 0) continue;
+                Fraction b = simplexTable.getElements()[i][freeVariables.size()];
+                Fraction bByCurr = b.divideBy(a);
+                if (min == null) {
+                    min = bByCurr;
+                } else if (bByCurr.compareTo(min) <= 0) {
+                    min = bByCurr;
+                }
+            }
+            //сравнение каждого b/a с минимумом (на случай если несколько)
+            for (int i = 0; i < simplexTable.getElements().length - 1; i++) {
+                Fraction a = simplexTable.getElements()[i][j];
+                if (a.getNumerator() <= 0) continue;
+                Fraction b = simplexTable.getElements()[i][freeVariables.size()];
+                Fraction bByCurr = b.divideBy(a);
+                if (bByCurr.compareTo(min) == 0)
+                    coordinates.add(new Coordinate(i, j));
+            }
+        }
+        this.pivots = coordinates;
+    }
+
+    public ArrayList<Integer> findPivotColumns(SimplexTable simplexTable) {
+        ArrayList<Integer> suitableColumns = new ArrayList<>();
+        for (int j = 0; j <= simplexTable.getFreeVariables().size() - 1; j++) {
+            Fraction fr = simplexTable.getElements()[simplexTable.getBasicVariables().size()][j];
+            if (fr.getNumerator() < 0) {
+                suitableColumns.add(j);
+            }
+        }
+        return suitableColumns;
     }
 
     public void calculateMatrix(Condition condition) {
@@ -34,7 +79,6 @@ public class SimplexTable {
         }
         Fraction[][] gaussMatrix = solveSystemWithBasis(matrixBeforeGauss, condition.getBasis());
         Fraction[][] finalM = formElementsTable(condition, gaussMatrix);
-        System.out.println(Arrays.deepToString(finalM));
         this.elements = finalM;
     }
 
@@ -51,11 +95,11 @@ public class SimplexTable {
         Fraction[] lastRow = countLastRow(target, condition.getBasis(), condition.getFreeVars(), freeVarsTable);
         Fraction[][] finalSimplexTable = new Fraction[freeVarsTable.length + 1][freeVarsTable[0].length];
 
-        // Копируем данные из исходной матрицы
+        // копируем данные из исходной матрицы
         for (int i = 0; i < freeVarsTable.length; i++) {
             System.arraycopy(freeVarsTable[i], 0, finalSimplexTable[i], 0, freeVarsTable[i].length);
         }
-        // Копируем данные из массива
+        // копируем данные из массива
         System.arraycopy(lastRow, 0, finalSimplexTable[freeVarsTable.length], 0, lastRow.length);
 
         return finalSimplexTable;
@@ -89,7 +133,7 @@ public class SimplexTable {
             if (j != row.length - 1) {
                 for (int i = 0; i < target.length; i++) {
                     int x_ = i + 1; // номер переменной
-                    if (!basis.contains(x_) ) { // если переменная не базисная
+                    if (!basis.contains(x_)) { // если переменная не базисная
                         if (free.get(j) != x_) continue; // если рассматривается ЕЁ коэфф из целевой функции
                         Fraction oldValue = row[j];
                         Fraction valueToAdd = target[i];
@@ -118,7 +162,6 @@ public class SimplexTable {
         return row;
     }
 
-
     //----------------------------G&S-------------------------------
     public ArrayList<Integer> getBasicVariables() {
         return basicVariables;
@@ -146,5 +189,13 @@ public class SimplexTable {
 
     public void setCondition(Condition condition) {
         this.condition = condition;
+    }
+
+    public ArrayList<Coordinate> getPivots() {
+        return pivots;
+    }
+
+    public void setPivots(ArrayList<Coordinate> pivots) {
+        this.pivots = pivots;
     }
 }
