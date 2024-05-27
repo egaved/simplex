@@ -14,15 +14,27 @@ public class SimplexStepsWindow {
 
     public void display(Condition condition) {
         try {
-            Stage stage = new Stage();
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/ru/ac/uniyar/simplex/simplex-steps.fxml"));
-            Scene scene = new Scene(fxmlLoader.load());
-            stage.setTitle("Симплекс-метод. Шаги.");
-            stage.setScene(scene);
-            SimplexStepsController controller = fxmlLoader.getController();
-            controller.setProperties(stage, condition);
-            controller.init(new SimplexTable(condition));
-            stage.show();
+            if (condition.getArtificialBasis()) {
+                Stage stage = new Stage();
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/ru/ac/uniyar/simplex/simplex-steps.fxml"));
+                Scene scene = new Scene(fxmlLoader.load());
+                stage.setTitle("Симплекс-метод. Шаги.");
+                stage.setScene(scene);
+                SimplexStepsController controller = fxmlLoader.getController();
+                controller.setProperties(stage, condition);
+                controller.init(new SimplexTable(condition));
+                stage.show();
+            } else {
+                Stage stage = new Stage();
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/ru/ac/uniyar/simplex/simplex-steps.fxml"));
+                Scene scene = new Scene(fxmlLoader.load());
+                stage.setTitle("Искусствуенный базис. Шаги.");
+                stage.setScene(scene);
+                SimplexStepsController controller = fxmlLoader.getController();
+                controller.setProperties(stage, condition);
+                controller.init(new SimplexTable(condition));
+                stage.show();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -28,6 +28,7 @@ public class SimplexStepsController {
     private Rectangle lastSelectedRect = null;
     private Coordinate selectedPivot = null;
     private int currentStep;
+    private boolean artificialBasis;
 
     @FXML
     private GridPane table;
@@ -62,7 +63,6 @@ public class SimplexStepsController {
         for (int i = 0; i < oldTargetCoefs.length; i++) {
             newTargetCoefs[i] = "-" + oldTargetCoefs[i];
         }
-
         condition.setTargetFuncCoefficients(newTargetCoefs);
     }
 

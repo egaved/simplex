@@ -24,6 +24,7 @@ public class Condition {
 
     private ArrayList<Integer> freeVars;
 
+
     public Integer getVariablesNum() {
         return variablesNum;
     }

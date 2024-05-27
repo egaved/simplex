@@ -124,14 +124,14 @@ public class MainPageController {
         for (Node node : targetTable.getChildren()) {
             if (node instanceof TextField textField) {
                 String value = textField.getText();
-                if(value.equals("0") || value.isEmpty())
+                if (value.equals("0") || value.isEmpty())
                     throw new Exception("Поля коэффициентов целевой функции не могут содержать нули или быть пустыми.");
                 Fraction fraction = Fraction.getFraction(value);
                 if (fraction != null) {
 //                    if (fraction.getDenominator() == 1)
 //                        values[i] = String.valueOf(fraction.getNumerator());
 //                    else
-                        values[i] = String.valueOf(fraction.reduce());
+                    values[i] = String.valueOf(fraction.reduce());
                 }
                 i++;
             }
@@ -191,7 +191,7 @@ public class MainPageController {
         return vars;
     }
 
-    public void onSaveButtonClicked() {
+    public void onSaveButtonClicked() throws Exception {
         try {
             this.condition = new Condition();
             condition.setVariablesNum(Integer.parseInt(variablesNum.getText()));
@@ -212,13 +212,14 @@ public class MainPageController {
 
             SimplexStepsWindow simplexStage = new SimplexStepsWindow();
             simplexStage.display(condition);
-        } catch (Exception e) {
+        } catch (NullPointerException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Ошибка");
             alert.setHeaderText("Произошла ошибка при обработке данных");
-            if (e.getClass().equals(NullPointerException.class))
-                alert.setContentText("Не заданы условия задачи.");
-            else if (e.getClass().equals(NumberFormatException.class))
+//            if (e.getClass().equals(NullPointerException.class))
+//                alert.setContentText("Не заданы условия задачи.");
+//            else
+            if (e.getClass().equals(NumberFormatException.class))
                 alert.setContentText("В одно из полей введено не число.");
             else
                 alert.setContentText(e.toString());
@@ -250,10 +251,10 @@ public class MainPageController {
     }
 
     public void systemOutput(Condition condition) {
-        System.out.println("varNum: "  + condition.getVariablesNum());
-        System.out.println("restNum: " + condition.getRestrictionsNum() );
-        System.out.println("min?: " + condition.getMinimize() );
-        System.out.println("dec?: " + condition.getDecimals() );
+        System.out.println("varNum: " + condition.getVariablesNum());
+        System.out.println("restNum: " + condition.getRestrictionsNum());
+        System.out.println("min?: " + condition.getMinimize());
+        System.out.println("dec?: " + condition.getDecimals());
         System.out.println("target: " + Arrays.toString(condition.getTargetFuncCoefficients()));
         System.out.println("restrict: " + Arrays.deepToString(condition.getRestrictionsCoefficients()));
         System.out.println("basis: " + condition.getBasis());
