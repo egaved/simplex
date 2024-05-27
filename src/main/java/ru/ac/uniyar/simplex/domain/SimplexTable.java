@@ -5,6 +5,8 @@ import ru.ac.uniyar.simplex.secondary.Coordinate;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
 
 import static ru.ac.uniyar.simplex.calculations.Gauss.solveSystemWithBasis;
 
@@ -16,7 +18,62 @@ public class SimplexTable {
     private Condition condition;
     private ArrayList<Coordinate> pivots;
 
+    public SimplexTable(SimplexTable prevTable, Coordinate pivotCoordinates) {
+        this.basicVariables = new ArrayList<>(prevTable.basicVariables);
+        this.freeVariables = new ArrayList<>(prevTable.freeVariables);
+        this.pivots = new ArrayList<>();
 
+        swapVariables(pivotCoordinates);
+
+        calculateMatrix(prevTable.getElements(), pivotCoordinates);
+        findPivots(this);
+    }
+
+    public void calculateMatrix(Fraction[][] prevTable, Coordinate pivot) {
+        int pri = pivot.getRowIndex(); // pri - pivot row index (номер строки, элементы которой будут изменяться)
+        int pci = pivot.getColIndex();
+        Fraction[][] newTable = new Fraction[prevTable.length][prevTable[0].length];
+
+        for (int i = 0; i < prevTable.length; i++) {
+            System.arraycopy(prevTable[i], 0, newTable[i], 0, prevTable[i].length);
+        }
+
+//        System.out.println("matrix transform");
+//        System.out.println(Arrays.deepToString(newTable));
+
+        newTable[pri][pci] = Fraction.getFraction("1").divideBy(prevTable[pri][pci]);
+
+        //делим строку на опорный
+        for (int j = 0; j < prevTable[0].length; j++) {
+            if (j == pci) continue;
+            newTable[pri][j] = newTable[pri][j].divideBy(prevTable[pri][pci]);
+        }
+
+        //делим столбец на минус опорный
+        for (int i = 0; i < prevTable.length; i++) {
+            if (i == pri) continue;
+            Fraction negative = Fraction.getFraction(-1,1);
+            newTable[i][pci] = newTable[i][pci].divideBy(prevTable[pri][pci].multiplyBy(negative));
+        }
+
+        for (int i = 0; i < newTable.length; i++) {
+            if (i == pri) continue;
+            for (int j = 0; j < newTable[0].length; j++) {
+                if (j == pci) continue;
+                newTable[i][j] = newTable[i][j].subtract(prevTable[i][pci].multiplyBy(newTable[pri][j]));
+            }
+        }
+        this.elements = newTable;
+    }
+
+    public void swapVariables(Coordinate coordinate) {
+        int freeNumIndex = coordinate.getColIndex();
+        int basicNumIndex = coordinate.getRowIndex();
+
+        int temp = basicVariables.get(basicNumIndex);
+        basicVariables.set(basicNumIndex, freeVariables.get(freeNumIndex));
+        freeVariables.set(freeNumIndex, temp);
+    }
     public SimplexTable(Condition condition) {
         this.basicVariables = new ArrayList<>(condition.getBasis());
         this.freeVariables = new ArrayList<>(condition.getFreeVars());
@@ -24,7 +81,6 @@ public class SimplexTable {
         calculateMatrix(condition); // just given matrix after gauss.
         findPivots(this);
     }
-
 
     public void findPivots(SimplexTable simplexTable) {
         ArrayList<Integer> suitableColumns = findPivotColumns(simplexTable);

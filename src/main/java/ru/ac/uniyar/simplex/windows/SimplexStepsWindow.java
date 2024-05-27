@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 
 import ru.ac.uniyar.simplex.controllers.SimplexStepsController;
 import ru.ac.uniyar.simplex.domain.Condition;
+import ru.ac.uniyar.simplex.domain.SimplexTable;
 
 import java.io.IOException;
 
@@ -20,7 +21,7 @@ public class SimplexStepsWindow {
             stage.setScene(scene);
             SimplexStepsController controller = fxmlLoader.getController();
             controller.setProperties(stage, condition);
-            controller.init();
+            controller.init(new SimplexTable(condition));
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();

@@ -3,6 +3,8 @@ package ru.ac.uniyar.simplex.controllers;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
@@ -10,43 +12,55 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.math.Fraction;
+import org.w3c.dom.ls.LSOutput;
 import ru.ac.uniyar.simplex.domain.Condition;
 import ru.ac.uniyar.simplex.domain.SimplexTable;
 import ru.ac.uniyar.simplex.secondary.Coordinate;
 
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 
 public class SimplexStepsController {
 
     private Stage stage;
+    private LinkedList<SimplexTable> steps;
     private Condition condition;
     private SimplexTable simplex;
     private Rectangle lastSelectedRect = null;
     private Coordinate selectedPivot = null;
+    private int currentStep;
 
     @FXML
     private GridPane table;
-
     @FXML
     private Label pivotLabel;
+    @FXML
+    private Button nextButton;
+    @FXML
+    private Button prevButton;
+    @FXML
+    private Label stepLabel;
 
     public void setProperties(Stage stage, Condition condition) {
         this.stage = stage;
         this.condition = condition;
         this.simplex = new SimplexTable(condition);
+        this.steps = new LinkedList<>();
+        steps.add(simplex);
+        currentStep = 0;
+        nextButton.setDisable(true);
+        prevButton.setDisable(true);
     }
 
-
-
-    public void init() {
-        int cols = simplex.getFreeVariables().size() + 2;
-        int rows = simplex.getBasicVariables().size() + 2;
+    public void init(SimplexTable simplexTable) {
+        stepLabel.setText("Шаг " + currentStep);
+        int cols = simplexTable.getFreeVariables().size() + 2;
+        int rows = simplexTable.getBasicVariables().size() + 2;
 
         for (int i = 0; i < cols; i++) {
             String columnHeader;
             if (i == 0 || i == cols - 1) columnHeader = " ";
-            else columnHeader = "x" + simplex.getFreeVariables().get(i - 1);
+            else columnHeader = "x" + simplexTable.getFreeVariables().get(i - 1);
             Label columnLabel = new Label(columnHeader);
             columnLabel.setFont(new Font(16));
             table.add(columnLabel, i, 0);
@@ -59,7 +73,7 @@ public class SimplexStepsController {
                 if (j == 0) {
                     String tempStr;
                     if (i != rows - 1) {
-                        tempStr = "x" + simplex.getBasicVariables().get(i - 1);
+                        tempStr = "x" + simplexTable.getBasicVariables().get(i - 1);
                     } else {
                         tempStr = "";
                     }
@@ -69,13 +83,13 @@ public class SimplexStepsController {
                     table.add(rowLabel, 0, i);
                 } else {
                     String value;
-                    if (simplex.getElements()[i - 1][j - 1].getDenominator() == 1)
-                        value = String.valueOf(simplex.getElements()[i - 1][j - 1].getNumerator());
+                    if (simplexTable.getElements()[i - 1][j - 1].getDenominator() == 1)
+                        value = String.valueOf(simplexTable.getElements()[i - 1][j - 1].getNumerator());
                     else
-                        value = simplex.getElements()[i - 1][j - 1].toString();
+                        value = simplexTable.getElements()[i - 1][j - 1].toString();
 
                     Coordinate coordinate = new Coordinate((i - 1), (j - 1));
-                    Rectangle rect = createRectangle(coordinate, value);
+                    Rectangle rect = createRectangle(coordinate, simplexTable.getPivots());
 
                     Label label = new Label(value);
                     label.setPrefSize(50, 30);
@@ -84,7 +98,7 @@ public class SimplexStepsController {
                     StackPane stackPane = new StackPane(); // stackpane для наложения текста на прямоугольник
                     stackPane.getChildren().addAll(rect, label);
 
-                    for (Coordinate p : simplex.getPivots()) {
+                    for (Coordinate p : simplexTable.getPivots()) {
                         if (
                                 Objects.equals(coordinate.getRowIndex(), p.getRowIndex())
                                         &&
@@ -102,25 +116,26 @@ public class SimplexStepsController {
                                 selectedPivot = new Coordinate(coordinate.getRowIndex(), coordinate.getColIndex());
                                 pivotLabel.setText("Опорный элемент: " + value);
                                 pivotLabel.setFont(new Font(20));
+
                             });
                         }
                     }
-
                     table.add(stackPane, j, i);
                 }
             }
         }
+        nextButton.setDisable(!hasNextStep(this.simplex));
+        prevButton.setDisable(currentStep == 0);
     }
 
 
-
-    private Rectangle createRectangle(Coordinate coordinate, String value) {
+    private Rectangle createRectangle(Coordinate coordinate, ArrayList<Coordinate> pivots) {
         Rectangle rect = new Rectangle(50, 30);
         rect.setStroke(Color.BLACK);
         rect.setStrokeWidth(2);
         rect.setFill(Color.TRANSPARENT);
 
-        for (Coordinate p : simplex.getPivots()) {
+        for (Coordinate p : pivots) {
             if (
                     Objects.equals(coordinate.getRowIndex(), p.getRowIndex())
                             &&
@@ -133,24 +148,45 @@ public class SimplexStepsController {
         return rect;
     }
 
+    public boolean hasNextStep(SimplexTable simplexTable) {
+        return !simplexTable.getPivots().isEmpty();
+    }
+
+    public boolean hasPrevStep(SimplexTable simplexTable) {
+        return steps.size() != 1;
+    }
 
     public void onNextButtonClick() {
 
+        currentStep++;
+        SimplexTable nextTable = new SimplexTable(simplex, selectedPivot);
+        this.simplex = nextTable;
+        pivotLabel.setText("");
+        table.getChildren().clear();
+        lastSelectedRect = null;
+        steps.add(nextTable);
+        init(this.simplex);
+        System.out.println("curr: " + currentStep);
+        System.out.println("steps: " + steps.size());
+        System.out.println("-----------");
     }
 
     public void onPrevButtonClick() {
-
+        if (currentStep > 0) {
+            currentStep--;
+            SimplexTable prevTable = steps.get(currentStep);
+            this.simplex = prevTable;
+            pivotLabel.setText("");
+            table.getChildren().clear();
+            lastSelectedRect = null;
+            if (currentStep < steps.size() - 1) {
+                steps.remove(currentStep + 1);
+            }
+            init(this.simplex);
+            System.out.println("curr: " + currentStep);
+            System.out.println("steps: " + steps.size());
+            System.out.println("-----------");
+        }
     }
 
-
-    public void systemOutput(Condition condition) {
-        System.out.println("varNum: " + condition.getVariablesNum());
-        System.out.println("restNum: " + condition.getRestrictionsNum());
-        System.out.println("min?: " + condition.getMinimize());
-        System.out.println("dec?: " + condition.getDecimals());
-        System.out.println("target: " + Arrays.toString(condition.getTargetFuncCoefficients()));
-        System.out.println("restrict: " + Arrays.deepToString(condition.getRestrictionsCoefficients()));
-        System.out.println("basis: " + condition.getBasis());
-        System.out.println("artBas?: " + condition.getArtificialBasis());
-    }
 }

@@ -23,4 +23,5 @@
         <Button fx:id="nextButton" onAction="#onNextButtonClick" text="--&gt;" />
       </children>
    </HBox>
+   <Label fx:id="stepLabel" />
 </VBox>
