@@ -11,6 +11,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.math.Fraction;
 import ru.ac.uniyar.simplex.domain.Condition;
 import ru.ac.uniyar.simplex.domain.SimplexTable;
 import ru.ac.uniyar.simplex.secondary.Coordinate;
@@ -42,12 +43,27 @@ public class SimplexStepsController {
     public void setProperties(Stage stage, Condition condition) {
         this.stage = stage;
         this.condition = condition;
+
+        this.simplex = new SimplexTable();
+        if (!condition.getMinimize()) {
+            maxToMin(condition);
+        }
         this.simplex = new SimplexTable(condition);
         this.steps = new LinkedList<>();
         steps.add(simplex);
         currentStep = 0;
         nextButton.setDisable(true);
         prevButton.setDisable(true);
+    }
+
+    public void maxToMin(Condition condition) {
+        String[] oldTargetCoefs = condition.getTargetFuncCoefficients();
+        String[] newTargetCoefs = new String[oldTargetCoefs.length];
+        for (int i = 0; i < oldTargetCoefs.length; i++) {
+            newTargetCoefs[i] = "-" + oldTargetCoefs[i];
+        }
+
+        condition.setTargetFuncCoefficients(newTargetCoefs);
     }
 
     public void init(SimplexTable simplexTable) {
@@ -127,12 +143,26 @@ public class SimplexStepsController {
                     pivotLabel.setText("Опорный элемент: "
                             + simplexTable.getElements()[selectedPivot.getRowIndex()][selectedPivot.getColIndex()]);
                     pivotLabel.setFont(new Font(20));
-                } else if (simplexTable.getPivots().isEmpty()){
-                    pivotLabel.setText("Ответ: " + table.getChildren().getLast().);
-                    pivotLabel.setFont(new Font(20));
                 }
             }
 
+        }
+        if (simplexTable.getPivots().isEmpty()) {
+            // получаем ссылку на последний элемент таблицы
+            StackPane sp = (StackPane) table.getChildren().getLast();
+
+            // получаем ссылку на label в stakpane
+            Label label = (Label) sp.getChildren().get(1);
+
+            // получаем значение label
+            String value = label.getText();
+            Fraction answer = Fraction.getFraction(value);
+            if (condition.getMinimize()) {
+                answer = answer.multiplyBy(Fraction.getFraction(-1, 1));
+            }
+            if (answer.getDenominator() == 1) pivotLabel.setText("Ответ: " + answer.getNumerator());
+            else pivotLabel.setText("Ответ: " + answer);
+            pivotLabel.setFont(new Font(20));
         }
         nextButton.setDisable(!hasNextStep(this.simplex));
         prevButton.setDisable(currentStep == 0);

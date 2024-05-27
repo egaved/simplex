@@ -198,13 +198,7 @@ public class MainPageController {
             condition.setRestrictionsNum(Integer.parseInt(restrictionsNum.getText()));
             condition.setMinimize(taskCB.getValue().equals("Минимизировать"));
             condition.setDecimals(fractionsCB.getValue().equals("Десятичные"));
-            if (condition.getMinimize().equals(false)) {
-                for (String coef : condition.getTargetFuncCoefficients()) {
-                    coef = "-" + coef;
-                }
-            }
             condition.setTargetFuncCoefficients(getTargetFuncCoefficients());
-
             condition.setRestrictionsCoefficients(getRestrictionsCoefficients());
             ArrayList<Integer> basis = getBasisVars();
             if (basis.isEmpty()) {

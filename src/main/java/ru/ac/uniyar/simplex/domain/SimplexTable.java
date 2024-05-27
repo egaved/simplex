@@ -5,18 +5,21 @@ import ru.ac.uniyar.simplex.secondary.Coordinate;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
+
 
 import static ru.ac.uniyar.simplex.calculations.Gauss.solveSystemWithBasis;
 
 public class SimplexTable {
 
-    private final ArrayList<Integer> basicVariables;
+    private ArrayList<Integer> basicVariables;
     private ArrayList<Integer> freeVariables;
     private Fraction[][] elements;
     private Condition condition;
     private ArrayList<Coordinate> pivots;
+
+    public SimplexTable() {
+
+    }
 
     public SimplexTable(SimplexTable prevTable, Coordinate pivotCoordinates) {
         this.basicVariables = new ArrayList<>(prevTable.basicVariables);
@@ -37,9 +40,6 @@ public class SimplexTable {
         for (int i = 0; i < prevTable.length; i++) {
             System.arraycopy(prevTable[i], 0, newTable[i], 0, prevTable[i].length);
         }
-
-//        System.out.println("matrix transform");
-//        System.out.println(Arrays.deepToString(newTable));
 
         newTable[pri][pci] = Fraction.getFraction("1").divideBy(prevTable[pri][pci]);
 
@@ -74,6 +74,7 @@ public class SimplexTable {
         basicVariables.set(basicNumIndex, freeVariables.get(freeNumIndex));
         freeVariables.set(freeNumIndex, temp);
     }
+
     public SimplexTable(Condition condition) {
         this.basicVariables = new ArrayList<>(condition.getBasis());
         this.freeVariables = new ArrayList<>(condition.getFreeVars());
@@ -81,6 +82,8 @@ public class SimplexTable {
         calculateMatrix(condition); // just given matrix after gauss.
         findPivots(this);
     }
+
+
 
     public void findPivots(SimplexTable simplexTable) {
         ArrayList<Integer> suitableColumns = findPivotColumns(simplexTable);
