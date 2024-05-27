@@ -3,7 +3,6 @@ package ru.ac.uniyar.simplex.controllers;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
@@ -12,13 +11,12 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import org.apache.commons.lang3.math.Fraction;
-import org.w3c.dom.ls.LSOutput;
 import ru.ac.uniyar.simplex.domain.Condition;
 import ru.ac.uniyar.simplex.domain.SimplexTable;
 import ru.ac.uniyar.simplex.secondary.Coordinate;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SimplexStepsController {
 
@@ -66,7 +64,7 @@ public class SimplexStepsController {
             table.add(columnLabel, i, 0);
             GridPane.setHalignment(columnLabel, HPos.CENTER);
         }
-
+        AtomicBoolean f = new AtomicBoolean(false);//выбран ли опорный
         for (int i = 1; i <= rows - 1; i++) {
             table.addRow(i);
             for (int j = 0; j < cols; j++) {
@@ -105,6 +103,7 @@ public class SimplexStepsController {
                                         Objects.equals(coordinate.getColIndex(), p.getColIndex())
                         ) {
                             stackPane.setOnMouseClicked(mouseEvent -> {
+                                f.set(true);
                                 if (lastSelectedRect != rect) {
                                     rect.setFill(Color.LIGHTSKYBLUE);
                                     // если последний нажатый прямоугольник не равен null, возвращаем ему прозрачный цвет
@@ -116,13 +115,24 @@ public class SimplexStepsController {
                                 selectedPivot = new Coordinate(coordinate.getRowIndex(), coordinate.getColIndex());
                                 pivotLabel.setText("Опорный элемент: " + value);
                                 pivotLabel.setFont(new Font(20));
-
                             });
                         }
                     }
+
                     table.add(stackPane, j, i);
                 }
+                if (!f.get() && !simplexTable.getPivots().isEmpty()) {
+                    selectedPivot = new Coordinate(simplexTable.getPivots().getFirst().getRowIndex(),
+                            simplexTable.getPivots().getFirst().getColIndex());
+                    pivotLabel.setText("Опорный элемент: "
+                            + simplexTable.getElements()[selectedPivot.getRowIndex()][selectedPivot.getColIndex()]);
+                    pivotLabel.setFont(new Font(20));
+                } else if (simplexTable.getPivots().isEmpty()){
+                    pivotLabel.setText("Ответ: " + table.getChildren().getLast().);
+                    pivotLabel.setFont(new Font(20));
+                }
             }
+
         }
         nextButton.setDisable(!hasNextStep(this.simplex));
         prevButton.setDisable(currentStep == 0);
@@ -157,7 +167,6 @@ public class SimplexStepsController {
     }
 
     public void onNextButtonClick() {
-
         currentStep++;
         SimplexTable nextTable = new SimplexTable(simplex, selectedPivot);
         this.simplex = nextTable;
