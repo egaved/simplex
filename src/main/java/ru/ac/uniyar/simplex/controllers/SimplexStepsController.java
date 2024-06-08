@@ -3,6 +3,7 @@ package ru.ac.uniyar.simplex.controllers;
 import javafx.fxml.FXML;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
@@ -61,13 +62,15 @@ public class SimplexStepsController {
         String[] oldTargetCoefs = condition.getTargetFuncCoefficients();
         String[] newTargetCoefs = new String[oldTargetCoefs.length];
         for (int i = 0; i < oldTargetCoefs.length; i++) {
-            newTargetCoefs[i] = "-" + oldTargetCoefs[i];
+            Fraction negative = Fraction.getFraction(oldTargetCoefs[i]).multiplyBy(Fraction.getReducedFraction(-1, 1));
+            newTargetCoefs[i] = negative.toString();
         }
         condition.setTargetFuncCoefficients(newTargetCoefs);
     }
 
     public void init(SimplexTable simplexTable) {
-        stepLabel.setText("Шаг " + currentStep);
+        if (simplexTable.isArtBasis()) stepLabel.setText("Шаг (иск. базис)" + currentStep);
+        else stepLabel.setText("Шаг (симплекс)" + currentStep);
         int cols = simplexTable.getFreeVariables().size() + 2;
         int rows = simplexTable.getBasicVariables().size() + 2;
 
@@ -80,7 +83,7 @@ public class SimplexStepsController {
             table.add(columnLabel, i, 0);
             GridPane.setHalignment(columnLabel, HPos.CENTER);
         }
-        AtomicBoolean f = new AtomicBoolean(false);//выбран ли опорный
+        AtomicBoolean f = new AtomicBoolean(false); //выбран ли опорный
         for (int i = 1; i <= rows - 1; i++) {
             table.addRow(i);
             for (int j = 0; j < cols; j++) {
@@ -147,6 +150,7 @@ public class SimplexStepsController {
             }
 
         }
+
         if (simplexTable.getPivots().isEmpty()) {
             // получаем ссылку на последний элемент таблицы
             StackPane sp = (StackPane) table.getChildren().getLast();
@@ -162,10 +166,23 @@ public class SimplexStepsController {
             }
             if (answer.getDenominator() == 1) pivotLabel.setText("Ответ: " + answer.getNumerator());
             else pivotLabel.setText("Ответ: " + answer);
+            if(hasStepAfterAB()) {
+                pivotLabel.setText("Базис найден.");
+                pivotLabel.setFont(new Font(20));
+            }
             pivotLabel.setFont(new Font(20));
         }
-        nextButton.setDisable(!hasNextStep(this.simplex));
+        nextButton.setDisable(!hasNextStep(this.simplex) && !hasStepAfterAB());
         prevButton.setDisable(currentStep == 0);
+        if (simplexTable.isUnbounded()) {
+            pivotLabel.setText("Решение не ограничено (ребро уходит в бесконечность)");
+            pivotLabel.setFont(new Font(20));
+            nextButton.setDisable(true);
+        } else if (simplexTable.hasNoFreeVars()) {
+            pivotLabel.setText("Не осталось свободных переменных.");
+            pivotLabel.setFont(new Font(20));
+            nextButton.setDisable(true);
+        }
     }
 
 
@@ -197,17 +214,44 @@ public class SimplexStepsController {
     }
 
     public void onNextButtonClick() {
-        currentStep++;
-        SimplexTable nextTable = new SimplexTable(simplex, selectedPivot);
-        this.simplex = nextTable;
-        pivotLabel.setText("");
-        table.getChildren().clear();
-        lastSelectedRect = null;
-        steps.add(nextTable);
-        init(this.simplex);
-        System.out.println("curr: " + currentStep);
-        System.out.println("steps: " + steps.size());
-        System.out.println("-----------");
+        try {
+            if (!hasStepAfterAB()) {
+                currentStep++;
+                SimplexTable nextTable = new SimplexTable(simplex, selectedPivot);
+                this.simplex = nextTable;
+                pivotLabel.setText("");
+                table.getChildren().clear();
+                lastSelectedRect = null;
+                steps.add(nextTable);
+                init(this.simplex);
+            } else {
+                currentStep++;
+                SimplexTable fromABToSimplex = new SimplexTable(simplex);
+                this.simplex = fromABToSimplex;
+                pivotLabel.setText("");
+                table.getChildren().clear();
+                lastSelectedRect = null;
+                steps.add(fromABToSimplex);
+                init(this.simplex);
+            }
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Ошибка");
+            alert.setHeaderText("Произошла ошибка при обработке данных");
+            alert.showAndWait();
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public boolean hasStepAfterAB() {
+        int lastRowIndex = this.simplex.getElements().length - 1;
+        if (!this.simplex.isArtBasis()) return false;
+        for (int j = 0; j < this.simplex.getFreeVariables().size() + 1; j++) {
+            if (this.simplex.getElements()[lastRowIndex][j].getNumerator() != 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void onPrevButtonClick() {
@@ -222,10 +266,6 @@ public class SimplexStepsController {
                 steps.remove(currentStep + 1);
             }
             init(this.simplex);
-            System.out.println("curr: " + currentStep);
-            System.out.println("steps: " + steps.size());
-            System.out.println("-----------");
         }
     }
-
 }

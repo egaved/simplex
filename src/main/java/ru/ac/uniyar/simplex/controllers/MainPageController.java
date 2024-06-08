@@ -212,18 +212,19 @@ public class MainPageController {
 
             SimplexStepsWindow simplexStage = new SimplexStepsWindow();
             simplexStage.display(condition);
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Ошибка");
             alert.setHeaderText("Произошла ошибка при обработке данных");
-//            if (e.getClass().equals(NullPointerException.class))
-//                alert.setContentText("Не заданы условия задачи.");
-//            else
+            if (e.getClass().equals(NullPointerException.class))
+                alert.setContentText("Не заданы условия задачи.");
+            else
             if (e.getClass().equals(NumberFormatException.class))
                 alert.setContentText("В одно из полей введено не число.");
             else
                 alert.setContentText(e.toString());
             alert.showAndWait();
+            System.out.println(e.getMessage());
         }
     }
 

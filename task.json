@@ -4,8 +4,8 @@
   "minimize" : true,
   "decimals" : false,
   "artificialBasis" : true,
-  "targetFuncCoefficients" : [ "-1/1", "-4/1", "-1/1" ],
-  "restrictionsCoefficients" : [ [ "1", "-1", "1", "3" ], [ "2", "-5", "-1", "0" ] ],
+  "targetFuncCoefficients" : [ "-1/1", "-7/1", "1/1" ],
+  "restrictionsCoefficients" : [ [ "-1/1", "1/1", "2/1", "1/1" ], [ "1", "2", "13", "14" ] ],
   "basis" : [ 4, 5 ],
   "freeVars" : [ 1, 2, 3 ]
 }

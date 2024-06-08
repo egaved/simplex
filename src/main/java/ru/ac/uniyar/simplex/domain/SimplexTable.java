@@ -1,6 +1,7 @@
 package ru.ac.uniyar.simplex.domain;
 
 import org.apache.commons.lang3.math.Fraction;
+import ru.ac.uniyar.simplex.exceptions.NegativeBCoeffException;
 import ru.ac.uniyar.simplex.secondary.Coordinate;
 
 
@@ -22,13 +23,61 @@ public class SimplexTable {
 
     }
 
+    public SimplexTable(SimplexTable artBasTable) {
+        this.setCondition(artBasTable.getCondition());
+        this.basicVariables = new ArrayList<>(artBasTable.getBasicVariables());
+        this.freeVariables = new ArrayList<>(artBasTable.getFreeVariables());
+        this.pivots = new ArrayList<>();
+        this.artBasis = false;
+
+        this.elements = artBasTable.getElements();
+
+        recountLastRow(this);
+        findPivots(this);
+    }
+
+    public void recountLastRow(SimplexTable table) {
+        int n = table.getBasicVariables().size();
+        int m = table.getFreeVariables().size();
+        Fraction[] target = new Fraction[n + m];
+        for (int i = 0; i < target.length; i++)
+            target[i] = Fraction.getFraction(table.getCondition().getTargetFuncCoefficients()[i]);
+        Fraction[][] freeVarsMatrix = getFreeVarsMatrix(table.getElements());
+        Fraction[] lastRow = countLastRow(
+                target,
+                table.getBasicVariables(),
+                table.getFreeVariables(),
+                freeVarsMatrix
+        );
+
+        for (int j = 0; j < m + 1; j++) {
+            table.getElements()[n][j] = lastRow[j];
+        }
+    }
+
+    public static Fraction[][] getFreeVarsMatrix(Fraction[][] array) {
+        int n = array.length;
+        int m = array[0].length;
+
+        Fraction[][] newArray = new Fraction[n - 1][m];
+
+        for (int i = 0; i < n - 1; i++) {
+            System.arraycopy(array[i], 0, newArray[i], 0, m);
+        }
+
+        return newArray;
+    }
+
     public SimplexTable(SimplexTable prevTable, Coordinate pivotCoordinates) {
+        this.setCondition(prevTable.getCondition());
         this.basicVariables = new ArrayList<>(prevTable.basicVariables);
         this.freeVariables = new ArrayList<>(prevTable.freeVariables);
         this.pivots = new ArrayList<>();
+        this.artBasis = prevTable.artBasis;
+
+        System.out.println("art? - " + this.artBasis);
 
         swapVariables(pivotCoordinates);
-
         calculateMatrix(prevTable.getElements(), pivotCoordinates);
         findPivots(this);
     }
@@ -64,7 +113,34 @@ public class SimplexTable {
                 newTable[i][j] = newTable[i][j].subtract(prevTable[i][pci].multiplyBy(newTable[pri][j]));
             }
         }
+
+        //удаление столбца
+        if (this.artBasis) {
+            System.out.println(freeVariables);
+            System.out.println(basicVariables);
+            newTable = removeColumn(newTable, pci);
+            freeVariables.remove(pci);
+        }
+
         this.elements = newTable;
+    }
+
+//    public boolean checkOn
+
+    public Fraction[][] removeColumn(Fraction[][] array, int columnIndex) {
+        int n = array.length;
+        int m = array[0].length;
+
+        // Создаем новый массив с размерностью [n][m-1]
+        Fraction[][] newArray = new Fraction[n][m - 1];
+
+        // Копируем в новый массив все столбцы, кроме того, который нужно удалить
+        for (int i = 0; i < n; i++) {
+            System.arraycopy(array[i], 0, newArray[i], 0, columnIndex);
+            System.arraycopy(array[i], columnIndex + 1, newArray[i], columnIndex, m - columnIndex - 1);
+        }
+
+        return newArray;
     }
 
     public void swapVariables(Coordinate coordinate) {
@@ -77,7 +153,21 @@ public class SimplexTable {
     }
 
     public SimplexTable(Condition condition) {
+        for (int i = 0; i < condition.getRestrictionsCoefficients().length; i++) {
+            int lastCol = condition.getRestrictionsCoefficients()[0].length;
+            Fraction negativeMultiplier = Fraction.getFraction(-1, 1);
+            Fraction b = Fraction.getFraction(condition.getRestrictionsCoefficients()[i][lastCol - 1]);
+            if (b.getNumerator() < 0) {
+                for (int j = 0; j < lastCol; j++) {
+                    Fraction fr = Fraction.getFraction(condition.getRestrictionsCoefficients()[i][j])
+                            .multiplyBy(negativeMultiplier);
+                    condition.getRestrictionsCoefficients()[i][j] = fr.toString();
+                }
+            }
+        }
+
         if (!condition.getArtificialBasis()) {
+            this.setCondition(condition);
             artBasis = false;
             this.basicVariables = new ArrayList<>(condition.getBasis());
             this.freeVariables = new ArrayList<>(condition.getFreeVars());
@@ -85,6 +175,7 @@ public class SimplexTable {
             calculateMatrix(condition); // just given matrix after gauss.
             findPivots(this);
         } else {
+            this.setCondition(condition);
             artBasis = true;
             ArrayList<Integer> artBasFree = new ArrayList<>();
             ArrayList<Integer> artBasBas = new ArrayList<>();
@@ -95,7 +186,6 @@ public class SimplexTable {
                 else
                     artBasBas.add(i);
             }
-            System.out.println("basic" + artBasBas + "; free: " + artBasFree);
             condition.setBasis(artBasBas);
             condition.setFreeVars(artBasFree);
             this.basicVariables = new ArrayList<>(condition.getBasis());
@@ -163,6 +253,13 @@ public class SimplexTable {
             Fraction[][] gaussMatrix = solveSystemWithBasis(matrixBeforeGauss, condition.getBasis());
             finalM = formElementsTable(condition, gaussMatrix);
         } else {
+            for (int i = 0; i < n; i++) {
+                if (matrixBeforeGauss[i][m].getNumerator() < 0) {
+                    for (int j = 0; j < m; j++) {
+                        matrixBeforeGauss[i][j] = matrixBeforeGauss[i][j].multiplyBy(Fraction.getFraction("-1"));
+                    }
+                }
+            }
             finalM = formElementsTable(condition, matrixBeforeGauss);
         }
 
@@ -181,7 +278,7 @@ public class SimplexTable {
         } else {
             target = new Fraction[n];
             for (int i = 0; i < target.length; i++) {
-                target[i] = Fraction.getFraction(1,1);
+                target[i] = Fraction.getFraction(1, 1);
             }
         }
 
@@ -226,35 +323,70 @@ public class SimplexTable {
         for (int j = 0; j < row.length; j++) {
             int k = 0;
             if (j != row.length - 1) {
-                for (int i = 0; i < target.length; i++) {
-                    int x_ = i + 1; // номер переменной
-                    if (!artBasis && !basis.contains(x_)) { // если переменная не базисная
-                        if (free.get(j) != x_) continue; // если рассматривается ЕЁ коэфф из целевой функции
-                        Fraction oldValue = row[j];
-                        Fraction valueToAdd = target[i];
-                        Fraction sum = oldValue.add(valueToAdd);
+                if (artBasis) {
+                    for (int i = 0; i < basis.size(); i++) {
+                        Fraction ov = row[j];
+                        Fraction vta = matrix[i][j].multiplyBy(negativeMultiplier);
+                        Fraction sum = ov.add(vta);
                         row[j] = sum;
-                    } else {
-                        Fraction oldValue = row[j];
-                        Fraction valueToAdd = matrix[k][j].multiplyBy(negativeMultiplier).multiplyBy(target[i]);
-                        Fraction sum = oldValue.add(valueToAdd);
-                        row[j] = sum;
-                        k++;
+                    }
+                } else {
+                    for (int i = 0; i < basis.size(); i++) {
+                        int x_ = basis.get(i);
+                        Fraction ov = row[j];
+                        Fraction vta = matrix[i][j].multiplyBy(negativeMultiplier).multiplyBy(target[x_ - 1]);
+                        Fraction s = ov.add(vta);
+                        row[j] = s;
+                    }
+                    for (int x_ : free) {
+                        if (free.get(j) != x_) continue;
+                        Fraction ov = row[j];
+                        Fraction vta = target[x_ - 1];
+                        Fraction s = ov.add(vta);
+                        row[j] = s;
                     }
                 }
             } else {
-                for (int i = 0; i < target.length; i++) {
-                    int x_ = i + 1; // номер переменной
-                    if (!artBasis && !basis.contains(x_)) continue;
-                    Fraction oldValue = row[j];
-                    Fraction valueToAdd = matrix[k][j].multiplyBy(negativeMultiplier).multiplyBy(target[i]);
-                    Fraction sum = oldValue.add(valueToAdd);
-                    row[j] = sum;
-                    k++;
+                if (artBasis) {
+                    for (int i = 0; i < basis.size(); i++) {
+                        Fraction ov = row[j];
+                        Fraction vta = matrix[i][j].multiplyBy(negativeMultiplier);
+                        Fraction sum = ov.add(vta);
+                        row[j] = sum;
+                    }
+                } else {
+                    for (int i = 0; i < basis.size(); i++) {
+                        int x_ = basis.get(i);
+                        Fraction ov = row[j];
+                        Fraction vta = matrix[i][j].multiplyBy(target[x_ - 1]);
+                        Fraction sum = ov.add(vta);
+                        row[j] = sum;
+                    }
+                    row[j] = row[j].multiplyBy(negativeMultiplier);
                 }
             }
         }
         return row;
+    }
+
+    public boolean isUnbounded() {
+        for (int j = 0; j < this.elements[0].length; j++) {
+            boolean negative = true;
+            for (Fraction[] element : this.elements) {
+                if (element[j].getNumerator() > 0) {
+                    negative = false;
+                    break;
+                }
+            }
+            if (negative) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasNoFreeVars() {
+        return this.getFreeVariables().isEmpty();
     }
 
     //----------------------------G&S-------------------------------
@@ -292,5 +424,13 @@ public class SimplexTable {
 
     public void setPivots(ArrayList<Coordinate> pivots) {
         this.pivots = pivots;
+    }
+
+    public boolean isArtBasis() {
+        return artBasis;
+    }
+
+    public void setArtBasis(boolean artBasis) {
+        this.artBasis = artBasis;
     }
 }
