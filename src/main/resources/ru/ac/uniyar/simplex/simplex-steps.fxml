@@ -13,6 +13,7 @@
          <Insets bottom="15.0" />
       </VBox.margin>
    </Label>
+   <Label fx:id="basisLabel" />
    <GridPane fx:id="table" alignment="CENTER" hgap="10.0" vgap="10.0">
       <VBox.margin>
          <Insets bottom="10.0" />

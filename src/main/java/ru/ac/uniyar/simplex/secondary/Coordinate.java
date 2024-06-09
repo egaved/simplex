@@ -10,10 +10,6 @@ public class Coordinate {
         this.colIndex = j;
     }
 
-    public void out() {
-        System.out.println("(" + rowIndex + ", " + colIndex + ")");
-    }
-
     public Integer getColIndex() {
         return colIndex;
     }

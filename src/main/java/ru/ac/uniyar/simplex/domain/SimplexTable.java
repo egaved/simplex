@@ -1,7 +1,6 @@
 package ru.ac.uniyar.simplex.domain;
 
 import org.apache.commons.lang3.math.Fraction;
-import ru.ac.uniyar.simplex.exceptions.NegativeBCoeffException;
 import ru.ac.uniyar.simplex.secondary.Coordinate;
 
 
@@ -30,28 +29,35 @@ public class SimplexTable {
         this.pivots = new ArrayList<>();
         this.artBasis = false;
 
-        this.elements = artBasTable.getElements();
+        int n = artBasTable.getBasicVariables().size();
+        int m = artBasTable.getFreeVariables().size();
+        this.elements = new Fraction[n + 1][m + 1];
+        for (int i = 0; i < n + 1; i++) {
+            for (int j = 0; j < m + 1; j++) {
+                this.elements[i][j] = Fraction.getFraction(artBasTable.getElements()[i][j].toString());
+            }
+        }
 
-        recountLastRow(this);
+        recountLastRow();
         findPivots(this);
     }
 
-    public void recountLastRow(SimplexTable table) {
-        int n = table.getBasicVariables().size();
-        int m = table.getFreeVariables().size();
+    public void recountLastRow() {
+        int n = this.basicVariables.size();
+        int m = this.freeVariables.size();
         Fraction[] target = new Fraction[n + m];
         for (int i = 0; i < target.length; i++)
-            target[i] = Fraction.getFraction(table.getCondition().getTargetFuncCoefficients()[i]);
-        Fraction[][] freeVarsMatrix = getFreeVarsMatrix(table.getElements());
+            target[i] = Fraction.getFraction(this.condition.getTargetFuncCoefficients()[i]);
+        Fraction[][] freeVarsMatrix = getFreeVarsMatrix(this.elements);
         Fraction[] lastRow = countLastRow(
                 target,
-                table.getBasicVariables(),
-                table.getFreeVariables(),
+                this.basicVariables,
+                this.freeVariables,
                 freeVarsMatrix
         );
 
         for (int j = 0; j < m + 1; j++) {
-            table.getElements()[n][j] = lastRow[j];
+            this.elements[n][j] = lastRow[j];
         }
     }
 
@@ -74,8 +80,6 @@ public class SimplexTable {
         this.freeVariables = new ArrayList<>(prevTable.freeVariables);
         this.pivots = new ArrayList<>();
         this.artBasis = prevTable.artBasis;
-
-        System.out.println("art? - " + this.artBasis);
 
         swapVariables(pivotCoordinates);
         calculateMatrix(prevTable.getElements(), pivotCoordinates);
@@ -116,8 +120,6 @@ public class SimplexTable {
 
         //удаление столбца
         if (this.artBasis) {
-            System.out.println(freeVariables);
-            System.out.println(basicVariables);
             newTable = removeColumn(newTable, pci);
             freeVariables.remove(pci);
         }
@@ -205,6 +207,10 @@ public class SimplexTable {
             Fraction min = null;
             // поиск минимумального b/a
             for (int i = 0; i < simplexTable.getElements().length - 1; i++) {
+                int x_ = simplexTable.getBasicVariables().get(i); // номер рассматриваемой переменной
+                // при искуственном базисе пропускать строки переменных из условия.
+                if (artBasis && simplexTable.getCondition().getFreeVars().contains(x_)) continue;
+
                 Fraction a = simplexTable.getElements()[i][j];
                 if (a.getNumerator() <= 0) continue;
                 Fraction b = simplexTable.getElements()[i][freeVariables.size()];
@@ -321,7 +327,6 @@ public class SimplexTable {
         }
         Fraction negativeMultiplier = Fraction.getFraction(-1, 1);
         for (int j = 0; j < row.length; j++) {
-            int k = 0;
             if (j != row.length - 1) {
                 if (artBasis) {
                     for (int i = 0; i < basis.size(); i++) {
@@ -370,6 +375,7 @@ public class SimplexTable {
     }
 
     public boolean isUnbounded() {
+        if(artBasis) return false;
         for (int j = 0; j < this.elements[0].length; j++) {
             boolean negative = true;
             for (Fraction[] element : this.elements) {

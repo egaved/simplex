@@ -49,7 +49,7 @@
                 </Menu>
                 <Menu mnemonicParsing="false" text="О программе">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Справка" />
+                        <MenuItem fx:id="aboutButton" mnemonicParsing="false" text="Справка" />
                     </items>
                 </Menu>
             </menus>
@@ -74,13 +74,6 @@
                     </ChoiceBox>
                 </HBox>
 
-                <HBox spacing="5">
-                    <Label layoutX="13.0" layoutY="125.0" text="Дроби" />
-                    <ChoiceBox fx:id="fractionsCB" layoutX="62.0" layoutY="121.0" prefHeight="25.0" prefWidth="116.0">
-                        <String fx:id="ord" fx:value="Обыкновенные" />
-                        <String fx:id="" fx:value="Десятичные" />
-                    </ChoiceBox>
-                </HBox>
                 <Button fx:id="submitBtn" layoutX="871.0" layoutY="29.0" mnemonicParsing="false" onAction="#onSubmitButtonClicked" prefHeight="17.0" prefWidth="106.0" text="Применить" />
             </children>
             <padding>

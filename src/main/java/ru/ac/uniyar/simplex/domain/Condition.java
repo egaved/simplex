@@ -1,9 +1,6 @@
 package ru.ac.uniyar.simplex.domain;
 
-import org.apache.commons.lang3.math.Fraction;
-
 import java.util.ArrayList;
-import java.util.List;
 
 public class Condition {
     private Integer variablesNum;
@@ -11,8 +8,6 @@ public class Condition {
     private Integer restrictionsNum;
 
     private Boolean minimize;
-
-    private Boolean decimals;
 
     private Boolean artificialBasis;
 
@@ -47,14 +42,6 @@ public class Condition {
 
     public void setMinimize(Boolean minimize) {
         this.minimize = minimize;
-    }
-
-    public Boolean getDecimals() {
-        return decimals;
-    }
-
-    public void setDecimals(Boolean decimals) {
-        this.decimals = decimals;
     }
 
     public String[] getTargetFuncCoefficients() {

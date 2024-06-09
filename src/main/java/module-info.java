@@ -16,6 +16,7 @@ module ru.ac.uniyar.simplex {
     exports ru.ac.uniyar.simplex;
     exports ru.ac.uniyar.simplex.domain;
     exports ru.ac.uniyar.simplex.calculations;
+    exports ru.ac.uniyar.simplex.secondary;
     opens ru.ac.uniyar.simplex.controllers to javafx.fxml;
     opens ru.ac.uniyar.simplex.windows to javafx.fxml;
 }

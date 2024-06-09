@@ -36,6 +36,8 @@ public class SimplexStepsController {
     @FXML
     private Label pivotLabel;
     @FXML
+    private Label basisLabel;
+    @FXML
     private Button nextButton;
     @FXML
     private Button prevButton;
@@ -69,8 +71,8 @@ public class SimplexStepsController {
     }
 
     public void init(SimplexTable simplexTable) {
-        if (simplexTable.isArtBasis()) stepLabel.setText("Шаг (иск. базис)" + currentStep);
-        else stepLabel.setText("Шаг (симплекс)" + currentStep);
+        if (simplexTable.isArtBasis()) stepLabel.setText("Шаг (иск. базис): " + currentStep);
+        else stepLabel.setText("Шаг (симплекс): " + currentStep);
         int cols = simplexTable.getFreeVariables().size() + 2;
         int rows = simplexTable.getBasicVariables().size() + 2;
 
@@ -164,13 +166,21 @@ public class SimplexStepsController {
             if (condition.getMinimize()) {
                 answer = answer.multiplyBy(Fraction.getFraction(-1, 1));
             }
-            if (answer.getDenominator() == 1) pivotLabel.setText("Ответ: " + answer.getNumerator());
-            else pivotLabel.setText("Ответ: " + answer);
+            if (answer.getDenominator() == 1) {
+                pivotLabel.setText("Ответ: " + answer.getNumerator());
+                String basis = createBasisString(simplexTable);
+                basisLabel.setText("x* = " + basis);
+            }
+            else {
+                pivotLabel.setText("Ответ: " + answer);
+            }
+
             if(hasStepAfterAB()) {
                 pivotLabel.setText("Базис найден.");
-                pivotLabel.setFont(new Font(20));
+                basisLabel.setText("");
             }
             pivotLabel.setFont(new Font(20));
+            basisLabel.setFont(new Font(20));
         }
         nextButton.setDisable(!hasNextStep(this.simplex) && !hasStepAfterAB());
         prevButton.setDisable(currentStep == 0);
@@ -185,6 +195,28 @@ public class SimplexStepsController {
         }
     }
 
+    private String createBasisString(SimplexTable simplexTable) {
+
+        Fraction[] answer = new Fraction[simplexTable.getBasicVariables().size() + simplexTable.getFreeVariables().size()];
+        String[] result = new String[answer.length];
+        for (int i = 0; i < answer.length; i++) {
+            answer[i] = Fraction.getFraction("0");
+        }
+
+        for (int i = 0; i < simplexTable.getBasicVariables().size(); i++) {
+            int varNum = simplexTable.getBasicVariables().get(i);
+            answer[varNum - 1] =  simplexTable.getElements()[i][simplexTable.getFreeVariables().size()];
+        }
+
+        for (int i = 0; i < result.length; i++) {
+            if (answer[i].getDenominator() == 1)
+                result[i] = String.valueOf(answer[i].getNumerator());
+            else
+                result[i] = String.valueOf(answer[i]);
+        }
+
+        return Arrays.toString(result);
+    }
 
     private Rectangle createRectangle(Coordinate coordinate, ArrayList<Coordinate> pivots) {
         Rectangle rect = new Rectangle(50, 30);
@@ -256,6 +288,7 @@ public class SimplexStepsController {
 
     public void onPrevButtonClick() {
         if (currentStep > 0) {
+            basisLabel.setText("");
             currentStep--;
             SimplexTable prevTable = steps.get(currentStep);
             this.simplex = prevTable;

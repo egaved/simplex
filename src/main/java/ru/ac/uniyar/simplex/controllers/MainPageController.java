@@ -14,8 +14,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import static ru.ac.uniyar.simplex.secondary.JSONReader.readTaskFromJSON;
 import static ru.ac.uniyar.simplex.secondary.JSONReader.saveTaskToJSONFile;
@@ -28,8 +26,6 @@ public class MainPageController {
     private TextField restrictionsNum;
     @FXML
     private ChoiceBox<String> taskCB;
-    @FXML
-    private ChoiceBox<String> fractionsCB;
     @FXML
     private GridPane targetTable;
     @FXML
@@ -197,7 +193,6 @@ public class MainPageController {
             condition.setVariablesNum(Integer.parseInt(variablesNum.getText()));
             condition.setRestrictionsNum(Integer.parseInt(restrictionsNum.getText()));
             condition.setMinimize(taskCB.getValue().equals("Минимизировать"));
-            condition.setDecimals(fractionsCB.getValue().equals("Десятичные"));
             condition.setTargetFuncCoefficients(getTargetFuncCoefficients());
             condition.setRestrictionsCoefficients(getRestrictionsCoefficients());
             ArrayList<Integer> basis = getBasisVars();
@@ -250,16 +245,4 @@ public class MainPageController {
         }
         return sb.toString();
     }
-
-    public void systemOutput(Condition condition) {
-        System.out.println("varNum: " + condition.getVariablesNum());
-        System.out.println("restNum: " + condition.getRestrictionsNum());
-        System.out.println("min?: " + condition.getMinimize());
-        System.out.println("dec?: " + condition.getDecimals());
-        System.out.println("target: " + Arrays.toString(condition.getTargetFuncCoefficients()));
-        System.out.println("restrict: " + Arrays.deepToString(condition.getRestrictionsCoefficients()));
-        System.out.println("basis: " + condition.getBasis());
-        System.out.println("artBas?: " + condition.getArtificialBasis());
-    }
-
 }
