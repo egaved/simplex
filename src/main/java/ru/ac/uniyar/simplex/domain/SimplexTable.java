@@ -205,7 +205,7 @@ public class SimplexTable {
 
         for (int j : suitableColumns) {
             Fraction min = null;
-            // поиск минимумального b/a
+            // поиск минимального b/a
             for (int i = 0; i < simplexTable.getElements().length - 1; i++) {
                 int x_ = simplexTable.getBasicVariables().get(i); // номер рассматриваемой переменной
                 // при искуственном базисе пропускать строки переменных из условия.

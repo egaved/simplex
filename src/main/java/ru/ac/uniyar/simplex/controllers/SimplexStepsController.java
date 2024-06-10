@@ -173,6 +173,8 @@ public class SimplexStepsController {
             }
             else {
                 pivotLabel.setText("Ответ: " + answer);
+                String basis = createBasisString(simplexTable);
+                basisLabel.setText("x* = " + basis);
             }
 
             if(hasStepAfterAB()) {
@@ -186,6 +188,7 @@ public class SimplexStepsController {
         prevButton.setDisable(currentStep == 0);
         if (simplexTable.isUnbounded()) {
             pivotLabel.setText("Решение не ограничено (ребро уходит в бесконечность)");
+            basisLabel.setText("");
             pivotLabel.setFont(new Font(20));
             nextButton.setDisable(true);
         } else if (simplexTable.hasNoFreeVars()) {
